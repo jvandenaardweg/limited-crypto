@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <header class="header">
-      <h1>Limited supply cryptocurrencies</h1>
-      <h2>Compare cryptocurrencies that have a limited supply, just like Bitcoin</h2>
+      <h1>Limited cryptocurrencies</h1>
+      <h2>Compare cryptocurrencies that have a similar limited supply</h2>
     </header>
 
     <!-- <div id="nav">

@@ -90,17 +90,15 @@ async function analyze(stepSize, orderBy) {
           const data = {
             symbol: currency.symbol,
             name: currency.name,
-            supply: {
-              max: currency.max_supply,
-              total: currency.total_supply,
-              circulating: currency.circulating_supply,
-              percentage: supplyPercentage
-            },
-            price: {
-              value: priceValue,
-              differenceWithAverage: priceDifferenceWithAverage,
-              marketCap: currency.quotes.USD.market_cap
-            },
+            url: 'https://coinmarketcap.com/currencies/' + currency.website_slug,
+            slug: currency.website_slug,
+            maxSupply: currency.max_supply,
+            totalSupply: currency.total_supply,
+            circulatingSupply: currency.circulating_supply,
+            percentageSupplied: supplyPercentage,
+            price: priceValue,
+            differenceWithAverage: priceDifferenceWithAverage,
+            marketCap: currency.quotes.USD.market_cap,
             group: {
               step: step,
               stepSize: stepSize,

@@ -2474,6 +2474,10 @@ crypto-random-string@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-1.0.0.tgz#a230f64f568310e1498009940790ec99545bca7e"
 
+"cryptocurrency-icons@https://github.com/hyperdexapp/cryptocurrency-icons.git":
+  version "0.0.1"
+  resolved "https://github.com/hyperdexapp/cryptocurrency-icons.git#1af1674356c8a55157601e1bec3ad3f2c98c53bb"
+
 css-color-names@0.0.4:
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/css-color-names/-/css-color-names-0.0.4.tgz#808adc2e79cf84738069b646cb20ec27beb629e0"
