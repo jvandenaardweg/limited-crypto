@@ -2,7 +2,7 @@
   <div id="app">
     <header class="header">
       <h1>Limited cryptocurrencies</h1>
-      <h2>Compare cryptocurrencies that have a similar limited supply</h2>
+      <h2>Compare cryptocurrencies having similar limited supply</h2>
     </header>
 
     <!-- <div id="nav">
@@ -10,6 +10,10 @@
       <router-link to="/about">About</router-link>
     </div> -->
     <router-view/>
+
+    <div class="footer">
+      <p>Created with &hearts; in Amsterdam, by Jordy van den Aardweg. <a href="https://www.linkedin.com/in/jvandenaardweg/">Available for hire!</a></p>
+    </div>
   </div>
 </template>
 
@@ -24,8 +28,19 @@ body {
   line-height: 1.5;
 }
 
-.text-center {
+.footer {
   text-align: center;
+  color: #7C8E9C;
+
+  p, a {
+    color: #7C8E9C;
+    font-size: 14px;
+  }
+}
+
+.footer {
+  text-align: center;
+
 }
 
 .header {
@@ -34,7 +49,7 @@ body {
   margin: 50px 0;
 
   h1 {
-    font-size: 42px;
+    font-size: 46px;
     line-height: 1.2;
     margin: 0;
   }
@@ -51,6 +66,10 @@ small {
   font-family: 'Droid Sans Mono', monospace;
   color: #7C8E9C;
   font-weight: normal;
+
+  a {
+    color: #7C8E9C;
+  }
 }
 
 

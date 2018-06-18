@@ -1,7 +1,9 @@
 <template>
   <div class="currencies">
-    <input type="search" name="search" v-model="searchQuery" placeholder="Search one or multiple cryptocurrencies (seperated by a comma)..." />
-    <!-- {{ sorted }} -->
+    <div class="search">
+      <input type="search" name="search" v-model="searchQuery" @input="handleSearchInput" placeholder="Search and compare multiple currencies, example: BTC, XRP, NEO" />
+      <span class="btn btn-small" v-for="searchSymbol in searchSymbols" :key="searchSymbol">{{ searchSymbol }}</span>
+    </div>
     <small>
       Group by similar max supply:
       <ul class="filters">
@@ -28,13 +30,13 @@
 
     <p v-if="isLoading">Loading...</p>
 
-    <div v-if="!isLoading" class="currencies-group" :class="{'is-collapsed': collapsed.includes(key) }" v-for="(group, key) in sortedGroupedCurrencies" :key="key">
+    <div v-if="!isLoading && sortedGroupedCurrencies[key].length" class="currencies-group" :class="{'is-collapsed': collapsed.includes(key) }" v-for="(group, key) in sortedGroupedCurrencies" :key="key">
       <!-- <button type="button" >collapse</button> -->
       <header @click.prevent="handleCollapse(key)">
         <h2>{{ keyToStepSize(key) }} ({{ group.length }})</h2>
         <small>Average price: <span>{{ averageGroupPrice(group) }}</span></small>
       </header>
-      <div class="currencies-group__body">
+      <div class="currencies-group__body" v-if="group.length">
         <table class="table table--header">
           <thead>
             <tr>
@@ -86,7 +88,8 @@ export default {
     sortBy: 'name',
     orderBy: 'asc',
     searchQuery: null,
-    availableCryptocurrenciesIcons: availableCryptocurrenciesIcons.icons
+    availableCryptocurrenciesIcons: availableCryptocurrenciesIcons.icons,
+    searchSymbols: []
   }),
   beforeMount () {
     this.getData(this.stepSize)
@@ -95,7 +98,11 @@ export default {
     sortedGroupedCurrencies () {
       if (this.groupedCurrencies) {
         return Object.keys(this.groupedCurrencies).map(group => {
-          return this.groupedCurrencies[group].sort((a, b) => {
+          const filtered = this.groupedCurrencies[group].filter(currency => {
+            if (this.searchSymbols.length) return this.searchSymbols.includes(currency.symbol)
+            return true
+          })
+          return filtered.sort((a, b) => {
             if (this.orderBy === 'asc') {
               if (a[this.sortBy] < b[this.sortBy]) return -1
               if (a[this.sortBy] > b[this.sortBy]) return 1
@@ -110,6 +117,9 @@ export default {
     }
   },
   methods: {
+    handleSearchInput (event) {
+      console.log(event)
+    },
     handleCollapse (key) {
       this.collapsed.push(key)
     },
@@ -128,14 +138,15 @@ export default {
       this.isLoading = false
     },
     keyToStepSize (key) {
-      console.log(key)
+      // console.log(key)
       if (key === 'all') return 'All currencies'
       const total = key * this.stepSize
       // const smallNumber = this.toSmallNumber(total)
       return numeral(total).format('0,0') + ' - ' + numeral(total + this.stepSize - 1).format('0,0')
     },
     averageGroupPrice (group) {
-      return this.toCurrency(group[0].group.averagePrice)
+      if (group[0]) return this.toCurrency(group[0].group.averagePrice)
+      return 0
     },
     toSmallNumber (number) {
       return numeral(number).format('0,0a')
@@ -151,10 +162,22 @@ export default {
       if (this.sortBy === value) {
         if (this.orderBy === 'desc') this.orderBy = 'asc'
         else if (this.orderBy === 'asc') this.orderBy = 'desc'
-        console.log(this.orderBy)
+        // console.log(this.orderBy)
       }
       this.sortBy = value
       // console.log(event.target.value)
+    }
+  },
+  watch: {
+    searchQuery (newValue, oldValue) {
+      const uppercasedValue = newValue.toUpperCase().trim()
+      if (uppercasedValue.includes(',')) {
+        this.searchSymbols = uppercasedValue.split(',')
+      } else if (newValue) {
+        this.searchSymbols = [uppercasedValue]
+      } else {
+        this.searchSymbols = []
+      }
     }
   }
 }
@@ -178,7 +201,8 @@ export default {
 }
 
 .currencies-group {
-  margin-bottom: 50px;
+  margin-bottom: 5px;
+
   header {
     border-bottom: 1px #2E3F4B solid;
     padding-bottom: 10px;
@@ -205,6 +229,10 @@ export default {
     .currencies-group__body {
       display: none;
     }
+  }
+
+  .currencies-group__body {
+    margin-bottom: 40px;
   }
 }
 
@@ -265,6 +293,8 @@ export default {
   border-radius: 3px;
   cursor: pointer;
   transition: 250ms all;
+  padding: 2px 7px;
+  text-align: center;
 
   &.btn-small {
     font-size: 14px;
@@ -398,27 +428,29 @@ export default {
   }
 }
 
-input[type="search"] {
-  border: 0;
-  font-size: 16px;
-  background-color: #151E25;
-  padding: 15px;
-  width: 100%;
-  border-radius: 3px;
-  color: #EEF3F6;
-  margin-bottom: 15px;
+.search {
+  input {
+    border: 0;
+    font-size: 16px;
+    background-color: #151E25;
+    padding: 15px;
+    width: 100%;
+    border-radius: 3px;
+    color: #EEF3F6;
+    margin-bottom: 15px;
 
-  &::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-    color: #7C8E9C;
-    opacity: 1; /* Firefox */
-  }
-
-  &:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    &::placeholder {
       color: #7C8E9C;
-  }
+      opacity: 1;
+    }
 
-  &::-ms-input-placeholder { /* Microsoft Edge */
-      color: #7C8E9C;
+    &:-ms-input-placeholder {
+        color: #7C8E9C;
+    }
+
+    &::-ms-input-placeholder {
+        color: #7C8E9C;
+    }
   }
 }
 
