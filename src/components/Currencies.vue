@@ -5,18 +5,19 @@
 
       <div class="currencies__controls">
           <h2>Group by similar max supply:</h2>
+
           <ul class="filters">
-            <li><button type="button" class="btn btn-small" @click.prevent="getData(1000000)" :class="{'is-active': stepSize === 1000000}">1m</button></li>
-            <li><button type="button" class="btn btn-small" @click.prevent="getData(5000000)" :class="{'is-active': stepSize === 5000000}">5m</button></li>
-            <li><button type="button" class="btn btn-small" @click.prevent="getData(10000000)" :class="{'is-active': stepSize === 10000000}">10m</button></li>
-            <li><button type="button" class="btn btn-small" @click.prevent="getData(50000000)" :class="{'is-active': stepSize === 50000000}">50m</button></li>
-            <li><button type="button" class="btn btn-small" @click.prevent="getData(100000000)" :class="{'is-active': stepSize === 100000000}">100m</button></li>
-            <li><button type="button" class="btn btn-small" @click.prevent="getData(250000000)" :class="{'is-active': stepSize === 250000000}">250m</button></li>
-            <li><button type="button" class="btn btn-small" @click.prevent="getData(500000000)" :class="{'is-active': stepSize === 500000000}">500m</button></li>
-            <li><button type="button" class="btn btn-small" @click.prevent="getData(1000000000)" :class="{'is-active': stepSize === 1000000000}">1b</button></li>
-            <li><button type="button" class="btn btn-small" @click.prevent="getData(1000000000)" :class="{'is-active': stepSize === 10000000000}">10b</button></li>
-            <li><button type="button" class="btn btn-small" @click.prevent="getData(1000000000)" :class="{'is-active': stepSize === 100000000000}">100b</button></li>
-            <li><button type="button" class="btn btn-small" @click.prevent="getData(0)" :class="{'is-active': stepSize === 0}">don't group</button></li>
+            <li><btn className="btn-small" label="1m" @click.native="getData(1000000)" :class="{'is-active': stepSize === 1000000}"></btn></li>
+            <li><btn className="btn-small" label="5m" @click.native="getData(5000000)" :class="{'is-active': stepSize === 5000000}"></btn></li>
+            <li><btn className="btn-small" label="10m" @click.native="getData(10000000)" :class="{'is-active': stepSize === 10000000}"></btn></li>
+            <li><btn className="btn-small" label="50m" @click.native="getData(50000000)" :class="{'is-active': stepSize === 50000000}"></btn></li>
+            <li><btn className="btn-small" label="100m" @click.native="getData(100000000)" :class="{'is-active': stepSize === 100000000}"></btn></li>
+            <li><btn className="btn-small" label="250m" @click.native="getData(250000000)" :class="{'is-active': stepSize === 250000000}"></btn></li>
+            <li><btn className="btn-small" label="500m" @click.native="getData(500000000)" :class="{'is-active': stepSize === 500000000}"></btn></li>
+            <li><btn className="btn-small" label="1b" @click.native="getData(1000000000)" :class="{'is-active': stepSize === 1000000000}"></btn></li>
+            <li><btn className="btn-small" label="10b" @click.native="getData(10000000000)" :class="{'is-active': stepSize === 10000000000}"></btn></li>
+            <li><btn className="btn-small" label="100b" @click.native="getData(100000000000)" :class="{'is-active': stepSize === 100000000000}"></btn></li>
+            <li><btn className="btn-small" label="don't group" @click.native="getData(0)" :class="{'is-active': stepSize === 0}"></btn></li>
           </ul>
       </div>
     </div>
@@ -49,8 +50,8 @@
                 <tr :class="{'is-btc': currency.symbol === 'BTC'}">
                   <td width="50"><small>{{ currency.rank }}</small></td>
                   <td width="200">
-                    <span class="icon"><img v-if="iconUrl(currency.symbol)" :src="iconUrl(currency.symbol)" width="20" /></span>
-                    <a :href="currency.url"><strong>{{ currency.name }}</strong> ({{ currency.symbol }}) <span v-if="!currency.maxSupply" class="badge">u</span></a>
+                    <icon :symbol="currency.symbol"></icon>
+                    <a :href="currency.url"><strong>{{ currency.name }}</strong> ({{ currency.symbol }})</a>
                   </td>
                   <td width="125"><small>{{ toCurrency(currency.price) }}</small></td>
                   <td width="125"><small>${{ toSmallNumber(currency.marketCap) }}</small></td>
@@ -71,14 +72,17 @@
 </template>
 
 <script>
-import Search from '@/components/Search'
 import numeral from 'numeral'
-import availableCryptocurrenciesIcons from '../../public/icons/manifest.json'
+import Search from '@/components/Search'
+import Icon from '@/components/Icon'
+import Btn from '@/components/Btn'
 
 export default {
   name: 'Currencies',
   components: {
-    Search
+    Search,
+    Icon,
+    Btn
   },
   data: () => ({
     stepSize: 0, // Don't group on initial page load
@@ -88,7 +92,6 @@ export default {
     sortBy: 'marketCap',
     orderBy: 'desc',
     searchQuery: null,
-    availableCryptocurrenciesIcons: availableCryptocurrenciesIcons.icons,
     searchSymbols: []
   }),
   beforeMount () {
@@ -134,14 +137,6 @@ export default {
         this.collapsed.splice(index, 1)
       } else {
         this.collapsed.push(key)
-      }
-    },
-    iconUrl (symbol) {
-      const symbolLower = symbol.toLowerCase()
-      if (this.availableCryptocurrenciesIcons.includes(symbolLower)) {
-        return '/icons/' + symbolLower + '@2x.png'
-      } else {
-        return null
       }
     },
     async getData (stepSize) {
@@ -224,24 +219,12 @@ export default {
   }
 }
 
-.icon {
-  background: #2E3F4B;
-  width: 20px;
-  height: 20px;
-  border-radius: 100%;
-  display: inline-block;
-  // float: left;
-  margin-right: 10px;
-  vertical-align: middle;
-}
-
 .currencies-group {
   margin-bottom: 5px;
 
   header {
     border-bottom: 1px #2E3F4B solid;
     padding-bottom: 10px;
-    // margin-bottom: 10px;
     display: flex;
     line-height: 40px;
     cursor: pointer;
@@ -296,41 +279,6 @@ export default {
       height: 3px;
       background-color: #2481EB;
       width: 0;
-    }
-  }
-}
-
-.progress-legend {
-  display: flex;
-
-  .total {
-    margin-left: auto;
-  }
-}
-
-.btn {
-  display: inline-block;
-  background: none;
-  border: 0;
-  margin: 0;
-  color: #EEF3F6;
-  font-size: 16px;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: 250ms all;
-  padding: 2px 7px;
-  text-align: center;
-
-  &.btn-small {
-    font-size: 14px;
-    font-family: 'Droid Sans Mono', monospace;
-    color: #7C8E9C;
-    border: 1px #7C8E9C solid;
-
-    &:hover,
-    &.is-active {
-      background-color: #7C8E9C;
-      color: #151E25;
     }
   }
 }
@@ -441,38 +389,6 @@ export default {
   }
 }
 
-.search {
-  input {
-    border: 0;
-    font-size: 16px;
-    background-color: #151E25;
-    padding: 15px;
-    width: 100%;
-    border-radius: 3px;
-    color: #EEF3F6;
-    margin-bottom: 15px;
-
-    &::placeholder {
-      color: #7C8E9C;
-      opacity: 1;
-    }
-
-    &:-ms-input-placeholder {
-        color: #7C8E9C;
-    }
-
-    &::-ms-input-placeholder {
-        color: #7C8E9C;
-    }
-  }
-
-  .search__body {
-    .btn {
-      margin-right: 10px;
-    }
-  }
-}
-
 .filters {
   list-style: none;
   margin: 0;
@@ -482,18 +398,5 @@ export default {
   li {
     margin-right: 10px;
   }
-}
-
-.badge {
-  display: inline-block;
-  background: none;
-  margin: 0;
-  padding: 0 5px;
-  font-size: 11px;
-  color: #fff;
-  border: 1px #FB5151 solid;
-  background-color: #FB5151;
-  border-radius: 3px;
-  font-family: 'Droid Sans Mono', monospace;
 }
 </style>
