@@ -150,9 +150,11 @@ export default {
       }
     },
     async getData (stepSize) {
+      const baseUrl = (process.env.NODE_ENV === 'production') ? 'http://localhost:3000/' : '/'
+
       this.isLoading = true
       this.stepSize = stepSize
-      this.groupedCurrencies = await fetch(`http://localhost:3000/api?stepSize=${stepSize}`).then(result => result.json())
+      this.groupedCurrencies = await fetch(`${baseUrl}/api?stepSize=${stepSize}`).then(result => result.json())
       this.isLoading = false
     },
     keyToStepSize (key) {
