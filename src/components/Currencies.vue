@@ -1,92 +1,96 @@
 <template>
   <div class="currencies">
-    <div class="search">
-      <input type="search" name="search" v-model="searchQuery" @input="handleSearchInput" placeholder="Search and compare multiple currencies, example: BTC, XRP, NEO" />
-      <span class="btn btn-small" v-for="searchSymbol in searchSymbols" :key="searchSymbol">{{ searchSymbol }}</span>
+    <div class="currencies__header">
+      <search @searched="handleSearch"></search>
+
+      <div class="currencies__controls">
+          <h2>Group by similar max supply:</h2>
+          <ul class="filters">
+            <li><button type="button" class="btn btn-small" @click.prevent="getData(1000000)" :class="{'is-active': stepSize === 1000000}">1m</button></li>
+            <li><button type="button" class="btn btn-small" @click.prevent="getData(5000000)" :class="{'is-active': stepSize === 5000000}">5m</button></li>
+            <li><button type="button" class="btn btn-small" @click.prevent="getData(10000000)" :class="{'is-active': stepSize === 10000000}">10m</button></li>
+            <li><button type="button" class="btn btn-small" @click.prevent="getData(50000000)" :class="{'is-active': stepSize === 50000000}">50m</button></li>
+            <li><button type="button" class="btn btn-small" @click.prevent="getData(100000000)" :class="{'is-active': stepSize === 100000000}">100m</button></li>
+            <li><button type="button" class="btn btn-small" @click.prevent="getData(250000000)" :class="{'is-active': stepSize === 250000000}">250m</button></li>
+            <li><button type="button" class="btn btn-small" @click.prevent="getData(500000000)" :class="{'is-active': stepSize === 500000000}">500m</button></li>
+            <li><button type="button" class="btn btn-small" @click.prevent="getData(1000000000)" :class="{'is-active': stepSize === 1000000000}">1b</button></li>
+            <li><button type="button" class="btn btn-small" @click.prevent="getData(1000000000)" :class="{'is-active': stepSize === 10000000000}">10b</button></li>
+            <li><button type="button" class="btn btn-small" @click.prevent="getData(1000000000)" :class="{'is-active': stepSize === 100000000000}">100b</button></li>
+            <li><button type="button" class="btn btn-small" @click.prevent="getData(0)" :class="{'is-active': stepSize === 0}">don't group</button></li>
+          </ul>
+      </div>
     </div>
-    <small>
-      Group by similar max supply:
-      <ul class="filters">
-        <li><button type="button" class="btn btn-small" @click.prevent="getData(1000000)" :class="{'is-active': stepSize === 1000000}">1m</button></li>
-        <li><button type="button" class="btn btn-small" @click.prevent="getData(5000000)" :class="{'is-active': stepSize === 5000000}">5m</button></li>
-        <li><button type="button" class="btn btn-small" @click.prevent="getData(10000000)" :class="{'is-active': stepSize === 10000000}">10m</button></li>
-        <li><button type="button" class="btn btn-small" @click.prevent="getData(50000000)" :class="{'is-active': stepSize === 50000000}">50m</button></li>
-        <li><button type="button" class="btn btn-small" @click.prevent="getData(100000000)" :class="{'is-active': stepSize === 100000000}">100m</button></li>
-        <li><button type="button" class="btn btn-small" @click.prevent="getData(250000000)" :class="{'is-active': stepSize === 250000000}">250m</button></li>
-        <li><button type="button" class="btn btn-small" @click.prevent="getData(500000000)" :class="{'is-active': stepSize === 500000000}">500m</button></li>
-        <li><button type="button" class="btn btn-small" @click.prevent="getData(1000000000)" :class="{'is-active': stepSize === 1000000000}">1b</button></li>
-        <li><button type="button" class="btn btn-small" @click.prevent="getData(1000000000)" :class="{'is-active': stepSize === 10000000000}">10b</button></li>
-        <li><button type="button" class="btn btn-small" @click.prevent="getData(1000000000)" :class="{'is-active': stepSize === 100000000000}">100b</button></li>
-        <li><button type="button" class="btn btn-small" @click.prevent="getData(0)" :class="{'is-active': stepSize === 0}">don't group</button></li>
-      </ul>
-    </small><br />
-    <!-- <small>
-      Filter by:
-      <button type="button" class="btn btn-small">market cap > 100m</button>
-      <button type="button" class="btn btn-small">remove exponential highest per group</button>
-      <button type="button" class="btn btn-small">don't filter</button>
-      <button type="button" class="btn btn-small">hide low market caps</button>
-    </small> -->
 
-    <p v-if="isLoading">Loading...</p>
+    <div class="currencies__body">
+      <div v-if="isLoading" class="currencies__loader"><p>Loading...</p></div>
 
-    <div v-if="!isLoading && sortedGroupedCurrencies[key].length" class="currencies-group" :class="{'is-collapsed': collapsed.includes(key) }" v-for="(group, key) in sortedGroupedCurrencies" :key="key">
-      <!-- <button type="button" >collapse</button> -->
-      <header @click.prevent="handleCollapse(key)">
-        <h2>{{ keyToStepSize(key) }} ({{ group.length }})</h2>
-        <small>Average price: <span>{{ averageGroupPrice(group) }}</span></small>
-      </header>
-      <div class="currencies-group__body" v-if="group.length">
-        <table class="table table--header">
-          <thead>
-            <tr>
-              <th width="250"><button type="button" name="sortBy" value="name" :class="{'is-active': sortBy === 'name', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}" @click.prevent="handleSortBy">Name</button></th>
-              <th width="125"><button type="button" name="sortBy" value="price" :class="{'is-active': sortBy === 'price', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}"  @click.prevent="handleSortBy">Price</button></th>
-              <th width="125"><button type="button" name="sortBy" value="marketCap" :class="{'is-active': sortBy === 'marketCap', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}"  @click.prevent="handleSortBy">Market cap.</button></th>
-              <th width="125"><button type="button" name="sortBy" value="circulatingSupply" :class="{'is-active': sortBy === 'circulatingSupply', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}"  @click.prevent="handleSortBy">Circ. supply</button></th>
-              <th width="125"><button type="button" name="sortBy" value="maxSupply" :class="{'is-active': sortBy === 'maxSupply', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}"  @click.prevent="handleSortBy">Max. supply</button></th>
-              <th width="100"><button type="button" name="sortBy" value="percentageSupplied" :class="{'is-active': sortBy === 'percentageSupplied', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}"  @click.prevent="handleSortBy">Supplied</button></th>
-            </tr>
-          </thead>
-        </table>
-        <div class="currencies-item" v-for="currency in group" :key="currency.slug">
-          <table class="table">
-            <tbody>
-              <tr :class="{'is-btc': currency.symbol === 'BTC'}">
-                <td width="250">
-                  <span class="icon"><img v-if="iconUrl(currency.symbol)" :src="iconUrl(currency.symbol)" width="20" /></span>
-                  <a :href="currency.url"><strong>{{ currency.name }}</strong> ({{ currency.symbol }})</a>
-                </td>
-                <td width="125"><small>{{ toCurrency(currency.price) }}</small></td>
-                <td width="125"><small>${{ toSmallNumber(currency.marketCap) }}</small></td>
-                <td width="125"><small>{{ toSmallNumber(currency.circulatingSupply) }}</small></td>
-                <td width="125"><small>{{ toSmallNumber(currency.maxSupply) }}</small></td>
-                <td width="100"><small>{{ toPercentage(currency.percentageSupplied) }}</small></td>
-              </tr>
+      <div v-if="!isLoading && sortedGroupedCurrencies[key].length" class="currencies-group" :class="{'is-collapsed': collapsed.includes(key) }" v-for="(group, key) in sortedGroupedCurrencies" :key="key">
+        <header @click.prevent="handleCollapse(key)">
+          <h2>{{ groupTitle(key, group) }}</h2>
+          <small>Average price: <span>{{ averageGroupPrice(group) }}</span></small>
+        </header>
+        <div class="currencies-group__body" v-if="group.length">
+          <table class="table table--header">
+            <thead>
               <tr>
-                <td colspan="6"><div class="progress"><div :style="{'width': toPercentage(currency.percentageSupplied)}"></div></div></td>
+                <th width="50"><button type="button" name="sortBy" value="rank" :class="{'is-active': sortBy === 'rank', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}" @click.prevent="handleSortBy">#</button></th>
+                <th width="200"><button type="button" name="sortBy" value="name" :class="{'is-active': sortBy === 'name', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}" @click.prevent="handleSortBy">Name</button></th>
+                <th width="125"><button type="button" name="sortBy" value="price" :class="{'is-active': sortBy === 'price', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}"  @click.prevent="handleSortBy">Price</button></th>
+                <th width="125"><button type="button" name="sortBy" value="marketCap" :class="{'is-active': sortBy === 'marketCap', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}"  @click.prevent="handleSortBy">Market cap.</button></th>
+                <th width="125"><button type="button" name="sortBy" value="circulatingSupply" :class="{'is-active': sortBy === 'circulatingSupply', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}"  @click.prevent="handleSortBy">Circ. supply</button></th>
+                <th width="125"><button type="button" name="sortBy" value="maxSupply" :class="{'is-active': sortBy === 'maxSupply', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}"  @click.prevent="handleSortBy">Max. supply</button></th>
+                <th width="100"><button type="button" name="sortBy" value="percentageSupplied" :class="{'is-active': sortBy === 'percentageSupplied', 'is-asc': orderBy === 'asc', 'is-desc': orderBy === 'desc'}"  @click.prevent="handleSortBy">Supplied</button></th>
               </tr>
-            </tbody>
+            </thead>
           </table>
+          <div class="currencies-item" v-for="currency in group" :key="currency.slug">
+            <table class="table">
+              <tbody>
+                <tr :class="{'is-btc': currency.symbol === 'BTC'}">
+                  <td width="50"><small>{{ currency.rank }}</small></td>
+                  <td width="200">
+                    <span class="icon"><img v-if="iconUrl(currency.symbol)" :src="iconUrl(currency.symbol)" width="20" /></span>
+                    <a :href="currency.url"><strong>{{ currency.name }}</strong> ({{ currency.symbol }}) <span v-if="!currency.maxSupply" class="badge">u</span></a>
+                  </td>
+                  <td width="125"><small>{{ toCurrency(currency.price) }}</small></td>
+                  <td width="125"><small>${{ toSmallNumber(currency.marketCap) }}</small></td>
+                  <td width="125"><small>{{ toSmallNumber(currency.circulatingSupply) }}</small></td>
+                  <td width="125"><small>{{ toSmallNumber(currency.maxSupply) }}</small></td>
+                  <td width="100"><small>{{ toPercentage(currency.percentageSupplied) }}</small></td>
+                </tr>
+                <tr>
+                  <td colspan="7"><div class="progress"><div :style="{'width': toPercentage(currency.percentageSupplied)}"></div></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
+
+
+
+
   </div>
 </template>
 
 <script>
+import Search from '@/components/Search'
 import numeral from 'numeral'
 import availableCryptocurrenciesIcons from '../../public/icons/manifest.json'
 
 export default {
   name: 'Currencies',
+  components: {
+    Search
+  },
   data: () => ({
-    stepSize: 10000000,
+    stepSize: 0, // Don't group on initial page load
     groupedCurrencies: null,
     isLoading: true,
     collapsed: [],
-    sortBy: 'name',
-    orderBy: 'asc',
+    sortBy: 'marketCap',
+    orderBy: 'desc',
     searchQuery: null,
     availableCryptocurrenciesIcons: availableCryptocurrenciesIcons.icons,
     searchSymbols: []
@@ -117,11 +121,25 @@ export default {
     }
   },
   methods: {
-    handleSearchInput (event) {
-      console.log(event)
+    groupTitle (key, group) {
+      if (!this.stepSize) return 'All currencies' + `(${group.length})`
+      return this.keyToStepSize(key) + `(${group.length})`
+    },
+    hasCurrencies (key) {
+      return !this.isLoading && this.sortedGroupedCurrencies[key].length
+    },
+    handleSearch (data) {
+      this.searchSymbols = data
+      // console.log('handle search', data)
     },
     handleCollapse (key) {
-      this.collapsed.push(key)
+      // If the key already exist, it's already collapsed. We now open it.
+      if (this.collapsed.includes(key)) {
+        const index = this.collapsed.indexOf(key)
+        this.collapsed.splice(index, 1)
+      } else {
+        this.collapsed.push(key)
+      }
     },
     iconUrl (symbol) {
       const symbolLower = symbol.toLowerCase()
@@ -187,6 +205,25 @@ export default {
 .currencies {
   width: 850px;
   margin: 0 auto;
+
+  .currencies__header {
+    margin-bottom: 20px;
+  }
+
+  .currencies__controls {
+    border-bottom: 1px #2E3F4B solid;
+    padding-bottom: 20px;
+
+    h2 {
+      font-size: 16px;
+    }
+  }
+
+  .currencies__loader {
+    font-size: 24px;
+    text-align: center;
+    padding: 20px 0;
+  }
 }
 
 .icon {
@@ -340,7 +377,8 @@ export default {
       // border-radius: 5px;
       // padding: 0 10px;
 
-      &:first-child {
+      &:first-child,
+      &:nth-child(2) {
         text-align: left;
       }
     }
@@ -357,7 +395,8 @@ export default {
       border-bottom: 1px #2E3F4B solid;
       text-align: right;
 
-      &:first-child {
+      &:first-child,
+      &:nth-child(2) {
         button {
           text-align: left;
         }
@@ -452,6 +491,12 @@ export default {
         color: #7C8E9C;
     }
   }
+
+  .search__body {
+    .btn {
+      margin-right: 10px;
+    }
+  }
 }
 
 .filters {
@@ -463,5 +508,24 @@ export default {
   li {
     margin-right: 10px;
   }
+}
+
+.badge {
+  // border: 0;
+  display: inline-block;
+  background: none;
+  margin: 0;
+  padding: 0 5px;
+  // width: 100%;
+  // display: block;
+  // padding: 10px 0;
+  // text-align: right;
+  font-size: 11px;
+  color: #fff;
+  border: 1px #FB5151 solid;
+  background-color: #FB5151;
+  border-radius: 3px;
+  // text-transform: uppercase;
+  font-family: 'Droid Sans Mono', monospace;
 }
 </style>

@@ -62,7 +62,7 @@ async function analyze(stepSize, orderBy) {
       if (!prev) prev = {}
 
       // We don't want steps with 0 in it, meaning: 0 max supply
-      // if (step && step !== '0') {
+      if (step && step !== '0') {
 
         // Calculate average price
         const totalInGroup = group.length
@@ -73,11 +73,11 @@ async function analyze(stepSize, orderBy) {
         const averagePrice = parseFloat(totalGroupPrice / totalInGroup)
 
         // Return a transformed object with additional info
-        prev[step] = group.filter(currency => currency.max_supply).map(currency => {
+        prev[step] = group.map(currency => {
           let valued
           const priceValue = parseFloat(currency.quotes.USD.price)
           const priceDifferenceWithAverage = priceValue - averagePrice
-          const supplyPercentage = (currency.total_supply / currency.max_supply)
+          const supplyPercentage = (currency.circulating_supply / currency.max_supply)
 
           if (priceValue > averagePrice) {
             valued = 'Above average for similar supply coins'
@@ -90,6 +90,7 @@ async function analyze(stepSize, orderBy) {
           const data = {
             symbol: currency.symbol,
             name: currency.name,
+            rank: currency.rank,
             url: 'https://coinmarketcap.com/currencies/' + currency.website_slug,
             slug: currency.website_slug,
             maxSupply: currency.max_supply,
@@ -99,13 +100,14 @@ async function analyze(stepSize, orderBy) {
             price: priceValue,
             differenceWithAverage: priceDifferenceWithAverage,
             marketCap: currency.quotes.USD.market_cap,
+            volume24h: currency.quotes.USD.volume_24h,
             group: {
               step: step,
               stepSize: stepSize,
               total: totalInGroup,
               averagePrice: averagePrice
             },
-            // currency: currency
+            currency: currency
           }
 
           return data
@@ -115,7 +117,7 @@ async function analyze(stepSize, orderBy) {
         // prev[step]
         return prev
 
-      // }
+      }
     }, {})
 
     // redis.hset('currencies', 'all', JSON.stringify(data))
