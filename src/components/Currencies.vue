@@ -67,10 +67,6 @@
         </div>
       </div>
     </div>
-
-
-
-
   </div>
 </template>
 
@@ -130,7 +126,6 @@ export default {
     },
     handleSearch (data) {
       this.searchSymbols = data
-      // console.log('handle search', data)
     },
     handleCollapse (key) {
       // If the key already exist, it's already collapsed. We now open it.
@@ -150,18 +145,21 @@ export default {
       }
     },
     async getData (stepSize) {
-      const baseUrl = (process.env.NODE_ENV === 'production') ? 'http://localhost:3000/' : '/'
+      const baseUrl = (process.env.NODE_ENV !== 'production') ? 'http://localhost:3000/' : '/'
 
-      this.isLoading = true
-      this.stepSize = stepSize
-      this.groupedCurrencies = await fetch(`${baseUrl}api?stepSize=${stepSize}`).then(result => result.json())
-      this.isLoading = false
+      try {
+        this.isLoading = true
+        this.stepSize = stepSize
+        this.groupedCurrencies = await fetch(`${baseUrl}api?stepSize=${stepSize}`).then(result => result.json())
+      } catch (err) {
+        console.log(err)
+      } finally {
+        this.isLoading = false
+      }
     },
     keyToStepSize (key) {
-      // console.log(key)
       if (key === 'all') return 'All currencies'
       const total = key * this.stepSize
-      // const smallNumber = this.toSmallNumber(total)
       return numeral(total).format('0,0') + ' - ' + numeral(total + this.stepSize - 1).format('0,0')
     },
     averageGroupPrice (group) {
@@ -182,10 +180,8 @@ export default {
       if (this.sortBy === value) {
         if (this.orderBy === 'desc') this.orderBy = 'asc'
         else if (this.orderBy === 'asc') this.orderBy = 'desc'
-        // console.log(this.orderBy)
       }
       this.sortBy = value
-      // console.log(event.target.value)
     }
   },
   watch: {
@@ -276,16 +272,6 @@ export default {
 }
 
 .currencies-item {
-  // padding-top: 10px;
-  // margin-bottom: 10px;
-  // padding-bottom: 20px;
-  // border-bottom: 1px #2E3F4B solid;
-  // progress {
-  //   width: 100%;
-  //   border: 0;
-  //   // background: red;
-  // }
-
   a {
     color: #EEF3F6;
     text-decoration: none;
@@ -359,25 +345,11 @@ export default {
     margin-bottom: 10px;
   }
 
-  // &:hover {
-  //   // tbody {
-  //     // tr {
-  //       &:hover {
-  //         td {
-  //           background-color: #2E3F4B;
-  //         }
-  //       }
-  //     // }
-  //   // }
-  // }
-
   tbody {
 
     td {
       text-align: right;
       transition: 250ms all;
-      // border-radius: 5px;
-      // padding: 0 10px;
 
       &:first-child,
       &:nth-child(2) {
@@ -513,21 +485,15 @@ export default {
 }
 
 .badge {
-  // border: 0;
   display: inline-block;
   background: none;
   margin: 0;
   padding: 0 5px;
-  // width: 100%;
-  // display: block;
-  // padding: 10px 0;
-  // text-align: right;
   font-size: 11px;
   color: #fff;
   border: 1px #FB5151 solid;
   background-color: #FB5151;
   border-radius: 3px;
-  // text-transform: uppercase;
   font-family: 'Droid Sans Mono', monospace;
 }
 </style>

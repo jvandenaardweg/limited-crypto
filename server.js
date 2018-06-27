@@ -11,7 +11,7 @@ app.use(cors())
 app.use(express.static(__dirname + '/dist'))
 
 // Serve API
-app.get('/api', async function(req, res){
+app.get('/api', async (req, res) => {
   const stepSize = req.query.stepSize
   const data = await analyze(stepSize)
   res.json(data)
