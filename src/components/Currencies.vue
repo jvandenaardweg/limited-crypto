@@ -154,7 +154,7 @@ export default {
 
       this.isLoading = true
       this.stepSize = stepSize
-      this.groupedCurrencies = await fetch(`${baseUrl}/api?stepSize=${stepSize}`).then(result => result.json())
+      this.groupedCurrencies = await fetch(`${baseUrl}api?stepSize=${stepSize}`).then(result => result.json())
       this.isLoading = false
     },
     keyToStepSize (key) {
